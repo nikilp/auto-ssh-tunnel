@@ -73,6 +73,10 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             if platform.system() == "Linux":
                 subprocess.Popen("yes | cp Client/connect.py /etc/init.d/", shell=True).wait()
                 subprocess.Popen("chmod +x /etc/init.d/connect.py", shell=True).wait()
+                subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
+                subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
+                subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
+                # check the status with "sudo systemctl enable autossh-mysql-tunnel.service"
                 subprocess.Popen("update-rc.d connect.py defaults 100", shell=True).wait()
             elif platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)

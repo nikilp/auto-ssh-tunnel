@@ -29,7 +29,7 @@ Licensed under the MIT License - [https://opensource.org/licenses/MIT](https://o
 
 ### System requirements
 
-- These instructions were tested on Ubuntu 15.10, Ubuntu 14.04.3, and Raspbian Jessie (Raspberry Pi)
+- These instructions were tested on Ubuntu 18.04, Ubuntu 15.10, Ubuntu 14.04.3, and Raspbian Jessie (Raspberry Pi)
 
 - The installation script automatically installs openssh-server with Apt  
 

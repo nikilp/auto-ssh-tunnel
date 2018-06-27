@@ -1,0 +1,13 @@
+[Unit]
+Description=Auto SSH tunnel service
+After=network.target
+StartLimitInterval=200
+StartLimitBurst=5
+
+[Service]
+Restart=always
+RestartSec=30
+ExecStart=/etc/init.d/connect.py
+
+[Install]
+WantedBy=multi-user.target
