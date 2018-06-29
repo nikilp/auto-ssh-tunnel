@@ -35,6 +35,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
     if installer is True:
 
         # install openssh-server with apt for Debian systems
+        print("[*] Installing autossh client")
         if platform.system() == "Linux":
             # if we trigger on sources.list then we know its Debian
             if os.path.isfile("/etc/apt/sources.list"):
@@ -65,14 +66,14 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 print "Please run configure.py first."
                 sys.exit()
                 
-            print("[*] Installing autossh client and setting it as startup application...")
+            print("[*] Setting up autossh client as startup application...")
             if platform.system() == "Linux":
                 subprocess.Popen("yes | cp Client/connect.py /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("chmod +x /etc/systemd/system/connect.py", shell=True).wait()
                 subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
-                # check the status with "sudo systemctl enable autossh-mysql-tunnel.service"
+                subprocess.Popen("sudo systemctl status auto-ssh-tunnel.service --no-pager", shell=True).wait()
             elif platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)
                 subprocess.Popen("yes | cp mac/StartupParameters.plist /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
