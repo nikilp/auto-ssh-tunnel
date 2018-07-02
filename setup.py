@@ -3,6 +3,7 @@
 # Python Installer / Uninstaller
 #
 import subprocess
+from subprocess import check_output
 import sys
 import os
 import platform
@@ -78,7 +79,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             subprocess.Popen("cd && mkdir .ssh -p", shell=True)
             
             if platform.system() == "Linux":
-                subprocess.Popen("sudo cp Client/connect.py /etc/systemd/system/", shell=True).wait()
+                subprocess.Popen("sudo cp --preserve=all Client/connect.py /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
@@ -106,7 +107,10 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             pass
         
         # if the installation has been successful
-        if os.path.isfile("/usr/local/bin/connect.py"):
+#        if os.path.isfile("/usr/local/bin/connect.py"):
+        out = check_output(["systemctl status auto-ssh-tunnel.service"])
+        print('-----:', out)
+        if out:
             print("[*] We are now finished! Restart the client to complete the installation. To run autossh, input connect.py on the terminal")
 #            subprocess.Popen("sudo python /usr/local/bin/connect.py", shell=True)
         else:
