@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Python Installer
+# Python Installer / Uninstaller
 #
 import subprocess
 import sys
@@ -13,6 +13,7 @@ from Client import connect
 if platform.system() == "Linux" or platform.system() == "Darwin":
     # give installer a null value
     installer = False
+    uninstaller = False
 
     # Check user ID
     if os.getuid() != 0:
@@ -23,6 +24,10 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
         # if our command option is true then install dependencies
         if sys.argv[1] == "install":
             installer = True
+
+        # if our command option is true then install dependencies
+        if sys.argv[1] == "uninstall":
+            uninstaller = True
 
     # if index is out of range then flag options
     except IndexError:
@@ -35,11 +40,11 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
     if installer is True:
 
         # install openssh-server with apt for Debian systems
-        print("[*] Installing autossh client")
         if platform.system() == "Linux":
             # if we trigger on sources.list then we know its Debian
             if os.path.isfile("/etc/apt/sources.list"):
 
+                print("[*] Installing dependencies..")
                 # force install of debian packages
                 subprocess.Popen("apt-get --force-yes -y install openssh-server", shell=True).wait()
             # if sources.list is not available then we're running something offset
@@ -47,29 +52,34 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 print("[!] You're not running a Debian variant. Installer not finished for this type of Linux distro.")
                 print("[!] Install open-ssh server manually for all of autossh dependencies.")
                 sys.exit()
-         
-#        if 'ServerAliveInterval' not in open('/etc/ssh/ssh_config').read():
-#            writetoSSH = open('/etc/ssh/ssh_config','a')
-#            writetoSSH.write("    ServerAliveInterval 30\n    ServerAliveCountMax 4")
-#            writetoSSH.close()
-#
-#        if 'ClientAliveInterval' not in open('/etc/ssh/sshd_config').read():
-#            writetoSSH = open('/etc/ssh/sshd_config','a')
-#            writetoSSH.write("ClientAliveInterval 30\nClientAliveCountMax 4")
-#            writetoSSH.close()
+
+        print("[*] Updating 'Alive' parameters in ssh_config and sshd_config...")
+        if 'ServerAliveInterval' not in open('/etc/ssh/ssh_config').read():
+            writetoSSH = open('/etc/ssh/ssh_config','a')
+            writetoSSH.write("    ServerAliveInterval 30\n    ServerAliveCountMax 4")
+            writetoSSH.close()
+
+        if 'ClientAliveInterval' not in open('/etc/ssh/sshd_config').read():
+            writetoSSH = open('/etc/ssh/sshd_config','a')
+            writetoSSH.write("ClientAliveInterval 30\nClientAliveCountMax 4")
+            writetoSSH.close()
 
         
         # if installation is done on client, the autossh automatically kicks in the daemon
         try:
             rootname = connect.username_ipaddress
             if rootname == "":
-                print "Please run configure.py first."
+                print("Please run configure.py first.")
                 sys.exit()
                 
+            print("[*] Installing autossh client...")
+                
             print("[*] Setting up autossh client as startup application...")
+            subprocess.Popen("cd && mkdir .ssh -p", shell=True)
+            
             if platform.system() == "Linux":
                 subprocess.Popen("yes | cp Client/connect.py /etc/systemd/system/", shell=True).wait()
-                subprocess.Popen("chmod +x /etc/systemd/system/connect.py", shell=True).wait()
+#                subprocess.Popen("chmod +x /etc/systemd/system/connect.py", shell=True).wait()
                 subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
@@ -78,7 +88,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)
                 subprocess.Popen("yes | cp mac/StartupParameters.plist /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
                 subprocess.Popen("yes | cp Client/connect.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
-                subprocess.Popen("chmod +x /System/Library/StartupItems/auto-ssh-tunnel/connect.py", shell=True).wait()
+#                subprocess.Popen("chmod +x /System/Library/StartupItems/auto-ssh-tunnel/connect.py", shell=True).wait()
 
             print("[*] Copying SSH-Keys file over to server...")
             subprocess.call("printf 'priv_key\n\n' | ssh-keygen -t rsa -b 2048 -v -P ''", shell=True)
@@ -105,6 +115,13 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
 #            subprocess.Popen("sudo python /usr/local/bin/connect.py", shell=True)
         else:
             print("[!] Installation has failed. Please ensure that connect.py and .pub file is installed")
+
+    # if user specified uninstall then proceed to uninstallation
+    if uninstaller is True:
+        subprocess.Popen("sudo systemctl stop auto-ssh-tunnel.service", shell=True).wait()
+        subprocess.Popen("sudo systemctl disable auto-ssh-tunnel.service", shell=True).wait()
+        subprocess.Popen("sudo rm -rf /etc/systemd/system/connect.py /etc/systemd/system/auto-ssh-tunnel.service /etc/auto-ssh-tunnel /usr/local/bin/connect.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True).wait()
+        print("[*] Uninstallation successful.")
 
 # if the platform is running on a MAC, a version will be ready soon
 # if platform.system() == 'Darwin':
