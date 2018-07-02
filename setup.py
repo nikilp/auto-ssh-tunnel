@@ -78,9 +78,8 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             subprocess.Popen("cd && mkdir .ssh -p", shell=True)
             
             if platform.system() == "Linux":
-                subprocess.Popen("yes | cp Client/connect.py /etc/systemd/system/", shell=True).wait()
-#                subprocess.Popen("chmod +x /etc/systemd/system/connect.py", shell=True).wait()
-                subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
+                subprocess.Popen("sudo cp Client/connect.py /etc/systemd/system/", shell=True).wait()
+                subprocess.Popen("sudo cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl status auto-ssh-tunnel.service --no-pager", shell=True).wait()
@@ -88,7 +87,6 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)
                 subprocess.Popen("yes | cp mac/StartupParameters.plist /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
                 subprocess.Popen("yes | cp Client/connect.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
-#                subprocess.Popen("chmod +x /System/Library/StartupItems/auto-ssh-tunnel/connect.py", shell=True).wait()
 
             print("[*] Copying SSH-Keys file over to server...")
             subprocess.call("printf 'priv_key\n\n' | ssh-keygen -t rsa -b 2048 -v -P ''", shell=True)
@@ -100,9 +98,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 subprocess.Popen("cat priv_key.pub | ssh " + rootname + " 'cat >> ~/.ssh/authorized_keys'", shell=True).wait()
 
             print("[*] Moving autossh client into the /usr/local/bin/ directory...")
-            subprocess.Popen("yes | cp Client/connect.py /usr/local/bin/", shell=True)
-            subprocess.Popen("chmod +x /usr/local/bin/connect.py", shell=True).wait()
-
+            subprocess.Popen("sudo cp Client/connect.py /usr/local/bin/", shell=True)
             
             print("[*] Moving private key to /etc/auto-ssh-tunnel/")
             subprocess.Popen("mkdir /etc/auto-ssh-tunnel && yes | cp priv_key /etc/auto-ssh-tunnel/priv_key", shell=True)
