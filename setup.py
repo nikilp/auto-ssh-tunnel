@@ -46,7 +46,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
 
                 print("[*] Installing dependencies..")
                 # force install of debian packages
-                subprocess.Popen("apt-get --force-yes -y install openssh-server", shell=True).wait()
+                subprocess.Popen("apt-get -y --allow-change-held-packages install openssh-server", shell=True).wait()
             # if sources.list is not available then we're running something offset
             else: 
                 print("[!] You're not running a Debian variant. Installer not finished for this type of Linux distro.")
