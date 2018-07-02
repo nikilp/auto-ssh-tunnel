@@ -3,7 +3,6 @@
 # Python Installer / Uninstaller
 #
 import subprocess
-from subprocess import check_output
 import sys
 import os
 import platform
@@ -80,6 +79,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             
             if platform.system() == "Linux":
                 subprocess.Popen("sudo cp --preserve=all Client/connect.py /etc/systemd/system/", shell=True).wait()
+                subprocess.Popen("sudo chmod +x /etc/systemd/system/connect.py", shell=True).wait()
                 subprocess.Popen("sudo cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("sudo systemctl start auto-ssh-tunnel.service", shell=True).wait()
                 subprocess.Popen("sudo systemctl enable auto-ssh-tunnel.service", shell=True).wait()
@@ -98,23 +98,21 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             elif platform.system() == "Darwin":
                 subprocess.Popen("cat priv_key.pub | ssh " + rootname + " 'cat >> ~/.ssh/authorized_keys'", shell=True).wait()
 
-            print("[*] Moving autossh client into the /usr/local/bin/ directory...")
-            subprocess.Popen("sudo cp Client/connect.py /usr/local/bin/", shell=True)
+#            print("[*] Moving autossh client into the /usr/local/bin/ directory...")
+#            subprocess.Popen("sudo cp Client/connect.py /usr/local/bin/", shell=True)
             
             print("[*] Moving private key to /etc/auto-ssh-tunnel/")
             subprocess.Popen("mkdir /etc/auto-ssh-tunnel && yes | cp priv_key /etc/auto-ssh-tunnel/priv_key", shell=True)
         except subprocess.CalledProcessError as e:
             pass
         
-        # if the installation has been successful
-#        if os.path.isfile("/usr/local/bin/connect.py"):
-        out = check_output(["systemctl status auto-ssh-tunnel.service"])
+        # Check if the installation has been successful
+        auto_ssh_service_not_started = subprocess.Popen("systemctl status auto-ssh-tunnel.service --no-pager", shell=True).wait()
         print('-----:', out)
-        if out:
-            print("[*] We are now finished! Restart the client to complete the installation. To run autossh, input connect.py on the terminal")
-#            subprocess.Popen("sudo python /usr/local/bin/connect.py", shell=True)
-        else:
+        if auto_ssh_service_not_started:
             print("[!] Installation has failed. Please ensure that connect.py and .pub file is installed")
+        else:
+            print("[*] We are now finished! Restart the client to complete the installation. To run autossh, input connect.py on the terminal")
 
     # if user specified uninstall then proceed to uninstallation
     if uninstaller is True:
