@@ -10,12 +10,12 @@ username_ipaddress = ""
 
 # A function that checks if there is an existing ssh process running in the backgroun:
 def ssh_running():
-    try:	
+    try:
         out = subprocess.check_output("pgrep -x ssh", shell=True)
         print(out)
     except subprocess.CalledProcessError as e:
         print("Running and activating ssh. Please wait for 1 minute...")
-	run_ssh()
+        run_ssh()
 
 # A	function that runs the ssh reverse tunnel
 def run_ssh():
