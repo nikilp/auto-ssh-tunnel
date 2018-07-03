@@ -39,9 +39,9 @@ for line in lines:
 
 connect_file.close()
 
-print "Writing to connect.py..."
+print("Writing to connect.py..."_
 connect_file = open("Client/connect.py", "w")
 connect_file.write("".join(edited_lines))
 connect_file.close()
 
-print "Configuration successful."
+print("Configuration successful.")
