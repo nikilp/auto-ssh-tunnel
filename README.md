@@ -88,7 +88,7 @@ System Preferences > Sharing. Turn on "Remote Login". Allow access for "All User
 `$ python configure.py <port> <username> <ip address>` 
 
 2. Run the following command:  
-`$ sudo python setup.py install`  
+`$ sudo ./setup.py install`  
 
 The installation will proceed automatically. If successful, the output of all the commands should roughly show:
 
@@ -167,7 +167,7 @@ Upon boot, the client will run `connect.py`, which sets up a reverse ssh tunnel.
 # **Uninstall**  
 
 To uninstall:
-`$ sudo rm -rf /etc/init.d/connect.py /etc/auto-ssh-tunnel /usr/local/bin/connect.py /System/Library/StartupItems/auto-ssh-tunnel/`  
+`$ sudo ./setup.py uninstall`  
 
 
 -------------------------
