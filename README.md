@@ -166,7 +166,7 @@ Upon boot, the client will run `connect.py`, which sets up a reverse ssh tunnel.
 
 # **Uninstall**  
 
-To uninstall:
+To uninstall:  
 `$ sudo ./setup.py uninstall`  
 
 
