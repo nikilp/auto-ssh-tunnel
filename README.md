@@ -85,7 +85,7 @@ System Preferences > Sharing. Turn on "Remote Login". Allow access for "All User
 &nbsp;  
 
 1. Run  configuration.py  to specify the port, username, and IP address of the SSH server:  
-`$ python configure.py <port> <username> <ip address>` 
+`$ ./configure.py <port> <username> <ip address>` 
 
 2. Run the following command:  
 `$ sudo ./setup.py install`  
