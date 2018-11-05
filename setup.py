@@ -10,6 +10,21 @@ import time
 
 from Client import connect
 
+
+try:
+    import pip
+except:
+    subprocess.Popen("sudo apt install --yes python3-pip", shell=True).wait()
+    import pip
+
+try:
+    crontab =  __import__('crontab')
+except ImportError:
+    print('Installing python-crontab')
+    pip.main(['install', 'python-crontab'])
+    crontab = __import__('crontab')
+
+
 # if nix or Mac then run installer
 if platform.system() == "Linux" or platform.system() == "Darwin":
     # give installer and uninstaller a null value
@@ -35,7 +50,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
         print("** Auto SSH Dependency Installer by Facerecog Asia **")
         print("** Written by: Muhammad Amrullah (Facerecog Asia) **")
         print("** Visit: https://github.com/facerecog **")
-        print("\nTo install: setup.py install")
+        print("\nTo install: sudo ./setup.py install")
 
     # if user specified install then lets proceed to the installation
     if installer is True:
@@ -83,6 +98,14 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 subprocess.Popen("chmod +x /etc/auto-ssh-tunnel/connect.py", shell=True).wait()
                 subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
                 subprocess.Popen("systemctl enable auto-ssh-tunnel.service", shell=True).wait()
+
+                subprocess.Popen("yes | cp Client/verify_auto_ssh_tunnel.sh /usr/local/bin/", shell=True).wait()
+                subprocess.Popen("chmod +x /usr/local/bin/verify_auto_ssh_tunnel.sh", shell=True).wait()
+
+                cron = crontab.CronTab(user='root')
+                job = cron.new(command='/usr/local/bin/verify_auto_ssh_tunnel.sh > /dev/null 2>&1')
+                job.minute.every(1)
+                cron.write()
             elif platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)
                 subprocess.Popen("yes | cp mac/StartupParameters.plist /System/Library/StartupItems/auto-ssh-tunnel/", shell=True)
@@ -127,6 +150,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
         subprocess.Popen("sudo systemctl stop auto-ssh-tunnel.service", shell=True).wait()
         subprocess.Popen("sudo systemctl disable auto-ssh-tunnel.service", shell=True).wait()
         subprocess.Popen("sudo rm -rf /etc/systemd/system/auto-ssh-tunnel.service /etc/auto-ssh-tunnel /usr/local/bin/connect.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True).wait()
+        subprocess.Popen("sudo rm -rf /usr/local/bin/verify_auto_ssh_tunnel.sh", shell=True).wait()
         print("[*] Uninstallation successful.")
 
 # if the platform is running on a MAC, a version will be ready soon
