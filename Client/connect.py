@@ -6,6 +6,7 @@ import subprocess
 location_of_pem_file = "/etc/auto-ssh-tunnel/priv_key"
 # configure.py will automatically edit port_open and username_ipaddress
 port_open = "50000"
+port_forward = "22"
 username_ipaddress = ""
 
 # A function that checks if there is an existing ssh process running in the backgroun:
@@ -20,7 +21,7 @@ def ssh_running():
 # A	function that runs the ssh reverse tunnel
 def run_ssh():
     try:
-        full_ssh_command= "ssh -i %s -N -R %s:localhost:22 %s" % (location_of_pem_file, port_open, username_ipaddress)
+        full_ssh_command= "ssh -i %s -N -R %s:localhost:%s %s" % (location_of_pem_file, port_open, port_forward, username_ipaddress)
         ssh_output = subprocess.check_output(full_ssh_command, shell=True)
         if not ssh_output:
             print("Successful")
@@ -30,4 +31,5 @@ def run_ssh():
 #Main Command
 
 if __name__ == "__main__":
-    ssh_running()
+#    ssh_running() # This works when only one tunnel is running
+    run_ssh()

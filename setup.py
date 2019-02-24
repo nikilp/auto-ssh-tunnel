@@ -8,8 +8,9 @@ import os
 import platform
 import time
 
-from Client import connect
+from Client import server
 
+from glob import glob
 
 try:
     import pip
@@ -83,7 +84,7 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
 
         # if installation is done on client, the autossh automatically kicks in the daemon
         try:
-            rootname = connect.username_ipaddress
+            rootname = server.username_ipaddress
             if rootname == "":
                 print("Please run configure.py first.")
                 sys.exit()
@@ -94,17 +95,20 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             subprocess.Popen("cd && mkdir .ssh -p", shell=True)
 
             if platform.system() == "Linux":
-                subprocess.Popen("mkdir /etc/auto-ssh-tunnel && yes | cp Client/connect.py /etc/auto-ssh-tunnel", shell=True).wait()
-                subprocess.Popen("chmod +x /etc/auto-ssh-tunnel/connect.py", shell=True).wait()
-                subprocess.Popen("yes | cp Client/auto-ssh-tunnel.service /etc/systemd/system/", shell=True).wait()
-                subprocess.Popen("systemctl enable auto-ssh-tunnel.service", shell=True).wait()
+                with open("Client/services.list", "r") as file:
+                    services = [line.rstrip() for line in file.readlines()]
+                for service in services:
+                    subprocess.Popen("mkdir -p /etc/auto-ssh-tunnel && yes | cp Client/connect_" + service + ".py /etc/auto-ssh-tunnel", shell=True).wait()
+                    subprocess.Popen("chmod +x /etc/auto-ssh-tunnel/connect_" + service + ".py", shell=True).wait()
+                    subprocess.Popen("yes | cp Client/auto-ssh-tunnel-" + service + ".service /etc/systemd/system/", shell=True).wait()
+                    subprocess.Popen("systemctl enable auto-ssh-tunnel-" + service + ".service", shell=True).wait()
 
-                subprocess.Popen("yes | cp Client/verify_auto_ssh_tunnel.sh /usr/local/bin/", shell=True).wait()
-                subprocess.Popen("chmod +x /usr/local/bin/verify_auto_ssh_tunnel.sh", shell=True).wait()
+                    subprocess.Popen("yes | cp Client/verify_auto_ssh_tunnel_" + service + ".sh /usr/local/bin/", shell=True).wait()
+                    subprocess.Popen("chmod +x /usr/local/bin/verify_auto_ssh_tunnel_" + service + ".sh", shell=True).wait()
 
-                cron = crontab.CronTab(user='root')
-                job = cron.new(command='/usr/local/bin/verify_auto_ssh_tunnel.sh > /dev/null 2>&1')
-                job.minute.every(1)
+                    cron = crontab.CronTab(user='root')
+                    job = cron.new(command='/usr/local/bin/verify_auto_ssh_tunnel_' + service + '.sh > /dev/null 2>&1')
+                    job.minute.every(1)
                 cron.write()
             elif platform.system() == "Darwin":
                 subprocess.Popen("mkdir /System/Library/StartupItems/auto-ssh-tunnel", shell=True)
@@ -132,25 +136,28 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
             pass
 
         # Start the service and check if the installation has been successful
-        subprocess.Popen("systemctl restart auto-ssh-tunnel.service", shell=True).wait()
-        auto_ssh_service_not_started = subprocess.Popen("systemctl status auto-ssh-tunnel.service --no-pager", shell=True).wait()
-        if auto_ssh_service_not_started:
-            time.sleep(1)
-            auto_ssh_service_not_started = subprocess.Popen("systemctl restart auto-ssh-tunnel.service --no-pager", shell=True).wait()
+        for service in services:
+            subprocess.Popen("systemctl restart auto-ssh-tunnel-" + service + ".service", shell=True).wait()
+            auto_ssh_service_not_started = subprocess.Popen("systemctl status auto-ssh-tunnel-" + service + ".service --no-pager", shell=True).wait()
             if auto_ssh_service_not_started:
-                print("[!] Installation has failed. Please ensure that connect.py and .pub file is installed")
-                exit(1)
+                time.sleep(1)
+                auto_ssh_service_not_started = subprocess.Popen("systemctl restart auto-ssh-tunnel-" + service + ".service --no-pager", shell=True).wait()
+                if auto_ssh_service_not_started:
+                    print("[!] Installation has failed. Please ensure that connect.py and .pub file is installed")
+                    exit(1)
         print("________________________________________________________________________")
         print("[*] We are now finished! Restart the client to complete the installation.")
         print("[*] To check the status of the auto-ssh-tunnel service enter on the terminal:\n")
-        print("  systemctl status auto-ssh-tunnel.service --no-pager\n")
+        print("  systemctl status auto-ssh-tunnel-" + service + ".service --no-pager\n")
 
     # if user specified uninstall then proceed to uninstallation
     if uninstaller is True:
-        subprocess.Popen("sudo systemctl stop auto-ssh-tunnel.service", shell=True).wait()
-        subprocess.Popen("sudo systemctl disable auto-ssh-tunnel.service", shell=True).wait()
-        subprocess.Popen("sudo rm -rf /etc/systemd/system/auto-ssh-tunnel.service /etc/auto-ssh-tunnel /usr/local/bin/connect.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True).wait()
-        subprocess.Popen("sudo rm -rf /usr/local/bin/verify_auto_ssh_tunnel.sh", shell=True).wait()
+        services = glob("/etc/systemd/system/auto-ssh-tunnel*.service")
+        for service in services:
+            subprocess.Popen("sudo systemctl stop " + service, shell=True).wait()
+            subprocess.Popen("sudo systemctl disable " + service, shell=True).wait()
+        subprocess.Popen("sudo rm -rf /etc/systemd/system/auto-ssh-tunnel*.service /etc/auto-ssh-tunnel /usr/local/bin/connect*.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True).wait()
+        subprocess.Popen("sudo rm -rf /usr/local/bin/verify_auto_ssh_tunnel*.sh", shell=True).wait()
         print("[*] Uninstallation successful.")
 
 # if the platform is running on a MAC, a version will be ready soon

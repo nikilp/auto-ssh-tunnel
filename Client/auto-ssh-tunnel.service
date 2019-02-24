@@ -1,5 +1,5 @@
 [Unit]
-Description=Auto SSH tunnel service
+Description=Auto SSH Tunnel Service
 After=network.target
 StartLimitIntervalSec=100
 StartLimitBurst=5
