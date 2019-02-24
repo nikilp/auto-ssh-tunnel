@@ -85,7 +85,7 @@ System Preferences > Sharing. Turn on "Remote Login". Allow access for "All User
 &nbsp;  
 
 1. Run  configuration.py  to specify the port, username, and IP address of the SSH server:  
-`$ ./configure.py <port> <username> <ip address>` 
+`$ ./configure.py <port_open> <port_forward> <username> <ip address>` 
 
 2. Run the following command:  
 `$ sudo ./setup.py install`  
@@ -98,14 +98,11 @@ Building dependency tree
 Reading state information... Done
 openssh-server is already the newest version.
 0 upgraded, 0 newly installed, 0 to remove and 118 not upgraded.
+[*] Updating 'Alive' parameters in ssh_config and sshd_config...
 [*] Installing autossh client...
 [*] Installing autossh as startup application...
-mkdir: cannot create directory ‘.ssh’: File exists
-yes: standard output: Broken pipe
-yes: write error
 Generating public/private rsa key pair.
-Enter file in which to save the key (/root/.ssh/id_rsa): priv_key already exists.
-Overwrite (y/n)? [*] Copying SSH-Keys file over to server...
+Enter file in which to save the key (/root/.ssh/id_rsa): Your identification has been saved in priv_key.
 /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
 /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
 "<username>@<ip address>" 's password: 
@@ -115,13 +112,8 @@ Now try logging into the machine, with:   "ssh ' "<username>@<ip address>" '"
 and check to make sure that only the key(s) you wanted were added.
 
 [*] Installing private keys inside protected folder...
-yes: standard output: Broken pipe
-yes: write error
 [*] Moving autossh client into the /usr/local/bin/ directory...
 [*] Moving private key to /etc/auto-ssh-tunnel/
-mkdir: cannot create directory ‘/etc/auto-ssh-tunnel’: File exists
-yes: standard output: Broken pipe
-yes: write error
 
 [*] We are now finished with the installation! Restart the client to complete the installation. To run autossh, input connect.py on the terminal.
 ```  

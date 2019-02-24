@@ -94,7 +94,7 @@ for line in lines:
     i += 1
 
 lines[exec_start_line - 1] = "ExecStart=/etc/auto-ssh-tunnel/connect_" + name + ".py\n"
-lines[description_line - 1] = "Description=Auto SSH Tunnel " + name.upper() + " service\n"
+lines[description_line - 1] = "Description=Auto SSH Tunnel " + name + " service\n"
 
 edited_lines = ""
 for line in lines:
@@ -132,7 +132,7 @@ for line in lines:
     i += 1
 
 lines[failed_line - 1] = "ssh_failed=$(systemctl status auto-ssh-tunnel-" + name + ".service --no-pager | grep failed -c)\n"
-lines[message_line - 1] = " echo Restarting Auto SSH Tunnel " + name.upper() + " Service\n"
+lines[message_line - 1] = " echo Restarting Auto SSH Tunnel " + name + " Service\n"
 lines[restart_line - 1] = " sudo systemctl restart auto-ssh-tunnel-" + name + ".service;\n"
 
 edited_lines = ""
@@ -158,4 +158,4 @@ with open("Client/services.list", "a+") as services_file:
         services_file.write(name + "\n")
 
 
-print("Configuration successful.")
+print("Configuration for " + name + " successful.")

@@ -12,18 +12,6 @@ from Client import server
 
 from glob import glob
 
-try:
-    import pip
-except:
-    subprocess.Popen("sudo apt install --yes python3-pip", shell=True).wait()
-    import pip
-
-try:
-    crontab =  __import__('crontab')
-except ImportError:
-    print('Installing python-crontab')
-    pip.main(['install', 'python-crontab'])
-    crontab = __import__('crontab')
 
 
 # if nix or Mac then run installer
@@ -50,11 +38,21 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
     except IndexError:
         print("** Auto SSH Dependency Installer by Facerecog Asia **")
         print("** Written by: Muhammad Amrullah (Facerecog Asia) **")
+        print("** Generalized to all ports by: Nikolay Petrov (Facerecog Asia) **")
         print("** Visit: https://github.com/facerecog **")
         print("\nTo install: sudo ./setup.py install")
 
     # if user specified install then lets proceed to the installation
     if installer is True:
+
+        try:
+            rootname = server.username_ipaddress
+        except:
+            rootname = ""
+
+        if rootname == "":
+            print("Please run configure.py first.")
+            sys.exit()
 
         # install openssh-server with apt for Debian systems
         if platform.system() == "Linux":
@@ -64,6 +62,19 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
                 print("[*] Installing dependencies..")
                 # force install of debian packages
                 subprocess.Popen("apt-get -y --allow-change-held-packages install openssh-server", shell=True).wait()
+                try:
+                    import pip
+                except:
+                    subprocess.Popen("sudo apt install --yes python3-pip", shell=True).wait()
+                    import pip
+
+                try:
+                    crontab =  __import__('crontab')
+                except ImportError:
+                    print('Installing python-crontab')
+                    pip.main(['install', 'python-crontab'])
+                    crontab = __import__('crontab')
+
             # if sources.list is not available then we're running something offset
             else:
                 print("[!] You're not running a Debian variant. Installer not finished for this type of Linux distro.")
@@ -84,11 +95,6 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
 
         # if installation is done on client, the autossh automatically kicks in the daemon
         try:
-            rootname = server.username_ipaddress
-            if rootname == "":
-                print("Please run configure.py first.")
-                sys.exit()
-
             print("[*] Installing autossh client...")
 
             print("[*] Setting up autossh client as startup application...")
@@ -154,8 +160,8 @@ if platform.system() == "Linux" or platform.system() == "Darwin":
     if uninstaller is True:
         services = glob("/etc/systemd/system/auto-ssh-tunnel*.service")
         for service in services:
-            subprocess.Popen("sudo systemctl stop " + service, shell=True).wait()
-            subprocess.Popen("sudo systemctl disable " + service, shell=True).wait()
+            subprocess.Popen("sudo systemctl stop " + service.split('/')[-1], shell=True).wait()
+            subprocess.Popen("sudo systemctl disable " + service.split('/')[-1], shell=True).wait()
         subprocess.Popen("sudo rm -rf /etc/systemd/system/auto-ssh-tunnel*.service /etc/auto-ssh-tunnel /usr/local/bin/connect*.py /System/Library/StartupItems/auto-ssh-tunnel/", shell=True).wait()
         subprocess.Popen("sudo rm -rf /usr/local/bin/verify_auto_ssh_tunnel*.sh", shell=True).wait()
         print("[*] Uninstallation successful.")
